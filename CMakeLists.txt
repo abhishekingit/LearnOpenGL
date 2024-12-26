@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(3rdParty/glfw)
 add_subdirectory(3rdParty/glad)
 
-add_executable(LearnOpenGL src/main.cpp)
+add_executable(LearnOpenGL src/main.cpp src/Shader.cpp src/Shader.h)
 
 target_link_libraries(LearnOpenGL glfw glad)
 
