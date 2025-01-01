@@ -15,5 +15,6 @@ target_include_directories(
 	LearnOpenGL PUBLIC
 	3rdParty/glad/include
 	3rdParty/glfw/include
+	3rdParty/stb_imageLoader
 	
 )
