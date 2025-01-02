@@ -85,3 +85,7 @@ void Shader::use() {
 void Shader::setBool(const char* vertexShaderPath, bool value) const {
 	glUniform1i(glGetUniformLocation(ID, vertexShaderPath), (int)value);
 }
+
+void Shader::setInt(const char* vertexShaderPath, int value) const {
+	glUniform1i(glGetUniformLocation(ID, vertexShaderPath), (int)value);
+}

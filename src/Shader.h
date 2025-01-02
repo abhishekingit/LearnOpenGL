@@ -16,5 +16,6 @@ public:
 	void use();
 
 	void setBool(const char* vertexShaderPath, bool value) const;
+	void setInt(const char* vertexShaderPath, int value) const;
 
 };
