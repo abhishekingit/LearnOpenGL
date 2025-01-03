@@ -35,10 +35,10 @@ int main() {
     Shader newShader("../../../src/vshader.vert", "../../../src/fshader.frag");
 
     constexpr std::array<float, 32> vertices = {
-        0.4f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        0.4f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 
-        -0.4f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.4f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f
+        0.6f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f,
+        0.6f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, 
+        -0.6f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.6f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 2.0f
     };
 
     unsigned int indices[] = {
@@ -94,7 +94,7 @@ int main() {
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -136,9 +136,7 @@ int main() {
     glUniform1i(glGetUniformLocation(newShader.ID, "ourTexture2"), 1);
     glUniform1i(glGetUniformLocation(newShader.ID, "ourTexture3"), 2);
 
-    glUniform1f(glGetUniformLocation(newShader.ID, "weight1"), 0.5f);
-    glUniform1f(glGetUniformLocation(newShader.ID, "weight2"), 0.4f);
-    glUniform1f(glGetUniformLocation(newShader.ID, "weight3"), 0.3f);
+    
 
  /*   newShader.setInt("texture1", 0);
     newShader.setInt("texture2", 1);*/
@@ -155,9 +153,23 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture2);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, texture3);
+
         
         newShader.use();
+        float timeVal = glfwGetTime();
+        float redVal = sin(timeVal) / 2.0f + 0.5f;
+        float greenVal = cos(timeVal) / 2.0f + 0.5f;
+        float blueVal = tan(timeVal) / 2.0f + 0.5f;
 
+        float weightVal1 = sin(timeVal) / 2.0f + 0.5f;
+        float weightVal2 = cos(timeVal) / 2.0f + 0.2f;
+        float weightVal3 = sin(timeVal) / 2.0f;
+        glUniform4f(glGetUniformLocation(newShader.ID, "finalColor"), redVal, greenVal, blueVal, 1.0f);
+        glUniform1f(glGetUniformLocation(newShader.ID, "weight1"), weightVal1);
+        glUniform1f(glGetUniformLocation(newShader.ID, "weight2"), weightVal2);
+        glUniform1f(glGetUniformLocation(newShader.ID, "weight3"), weightVal3);
+
+        
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
