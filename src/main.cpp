@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include <iostream>
 #include <array>
@@ -9,6 +12,12 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void initiateSpin(GLFWwindow* window);
+
+float rotationSpeed = 1.0f;
+const float speedIncrement = 0.001f;
+bool isRotating = false;
+
 
 int main() {
     glfwInit();
@@ -35,10 +44,10 @@ int main() {
     Shader newShader("../../../src/vshader.vert", "../../../src/fshader.frag");
 
     constexpr std::array<float, 32> vertices = {
-        0.6f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f,
-        0.6f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, 
-        -0.6f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.6f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 2.0f
+        0.4f, 0.8f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f,
+        0.4f, -0.8f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, 
+        -0.4f, -0.8f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.4f, 0.8f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 2.0f
     };
 
     unsigned int indices[] = {
@@ -67,6 +76,8 @@ int main() {
 
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    
 
     uint32_t texture1, texture2, texture3;
     glGenTextures(1, &texture1);
@@ -144,6 +155,16 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
+        initiateSpin(window);
+        
+        float rotAngle = 0.0f;
+
+        if (isRotating) {
+            rotAngle = glfwGetTime() * rotationSpeed;
+            rotationSpeed += speedIncrement;
+        }
+        
+        
 
         /*glClearColor(0.2f, 0.2f, 0.1f, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT);*/
@@ -169,10 +190,17 @@ int main() {
         glUniform1f(glGetUniformLocation(newShader.ID, "weight2"), weightVal2);
         glUniform1f(glGetUniformLocation(newShader.ID, "weight3"), weightVal3);
 
+        glm::mat4 transMat = glm::mat4(1.0f);
+        //transMat = glm::translate(transMat, glm::vec3(-0.5f, 0.0f, 0.0f));
+        transMat = glm::rotate(transMat, rotAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transMat));
         
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+        
+        
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -191,4 +219,9 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+}
+
+void initiateSpin(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+        isRotating = true;
 }
