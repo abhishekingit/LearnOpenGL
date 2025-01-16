@@ -17,3 +17,9 @@ Dynamic rotation with speed increments
 <img alt="gargantua.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/gargantua.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
 
  Using perspective projection with a static and moving model
+
+ ### Rendering Multiple cubes
+
+ <img alt="multipleCubes.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/multipleCubes.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
+
+ Rendering multiple cubes in the scene with different transformation matrices

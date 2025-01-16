@@ -327,6 +327,28 @@ int main() {
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //////moving model config ends
+
+        glm::mat4 transMat2 = glm::mat4(1.0f);
+        transMat2 = glm::rotate(transMat2, rotAngle * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glm::mat4 viewMat2 = glm::mat4(1.0f);
+        viewMat2 = glm::translate(viewMat2, glm::vec3(sin(timeVal) * 4.0f, 5.0f * (0.5f - cos(timeVal)), sin(timeVal) * 5.0f - 9.0f));
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transMat2));
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat2));
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(projMat));
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glm::mat4 transMat3 = glm::mat4(1.0f);
+        transMat3 = glm::rotate(transMat3, rotAngle * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        glm::mat4 viewMat3 = glm::mat4(1.0f);
+        viewMat3 = glm::translate(viewMat3, glm::vec3(sin(timeVal) * 3.0f, 0.0f, -cos(timeVal) * 2.0f - 11.0f));
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transMat3));
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat3));
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(projMat));
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         
 
         glfwSwapBuffers(window);
