@@ -7,9 +7,21 @@ out vec3 fragColor;
 out vec2 TexCoords;
 
 uniform mat4 transform;
+uniform mat4 viewM;
+uniform mat4 projM;
+
+uniform bool useVertexColor;
+uniform vec3 tempColor;
 
 void main() {
-	gl_Position = transform * vec4(aPos, 1.0);
-	fragColor = aColor;
+	gl_Position = projM * viewM * transform * vec4(aPos, 1.0);
+
+	if(useVertexColor) {
+		fragColor = aColor;
+	}
+	else {
+		fragColor = tempColor;
+	
+	}
 	TexCoords = aTexCoords;
 }
