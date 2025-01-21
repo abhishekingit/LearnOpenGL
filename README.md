@@ -23,3 +23,9 @@ Dynamic rotation with speed increments
  <img alt="multipleCubes.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/multipleCubes.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
 
  Rendering multiple cubes in the scene with different transformation matrices
+ 
+ ### 3D Camera Movement
+
+ <img alt="camMov.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/camMov.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
+
+ Camera movements and mouse movements along with reset

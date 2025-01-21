@@ -11,12 +11,30 @@
 #include "stb_image.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 void initiateSpin(GLFWwindow* window);
+void processCamMovement(GLFWwindow* window);
+void processCamReset(GLFWwindow* window);
+void resetCamera();
 
 float rotationSpeed = 1.0f;
+float lastX = 800.0f / 2.0f;
+float lastY = 600.0f / 2.0f;
+float fov = 45.0f;
+float lastFrame = 0.0f;
+float yaw = -90.0f;
+float pitch = 0.0f;
 const float speedIncrement = 0.01f;
 bool isRotating = false;
+bool firstMouse = true;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+glm::vec3 initialPos = cameraPos;
+glm::vec3 initialFront = cameraFront;
+glm::vec3 initialUp = cameraUp;
 
 
 int main() {
@@ -40,6 +58,10 @@ int main() {
     }
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwMaximizeWindow(window);
+    glfwSetCursorPosCallback(window, mouse_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_DEPTH_TEST);
 
     Shader newShader("../../../src/vshader.vert", "../../../src/fshader.frag");
@@ -237,6 +259,8 @@ int main() {
     glUniform1i(glGetUniformLocation(newShader.ID, "ourTexture2"), 1);
     glUniform1i(glGetUniformLocation(newShader.ID, "ourTexture3"), 2);
     glUniform1i(glGetUniformLocation(newShader.ID, "ourTexture4"), 3);
+    glm::mat4 projMat = glm::mat4(1.0f);
+    projMat = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
     
 
@@ -246,9 +270,11 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        processCamMovement(window);
         processInput(window);
         initiateSpin(window);
-        
+        processCamReset(window);
         float rotAngle = 0.0f;
 
         if (isRotating) {
@@ -270,22 +296,28 @@ int main() {
 
         
         newShader.use();
-        
+
+        glm::mat4 camViewMat = glm::mat4(1.0f);
+        camViewMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(camViewMat));
+       
+
+          
         glUniform1i(glGetUniformLocation(newShader.ID, "useVertexColor"), 0);
         glUniform3f(glGetUniformLocation(newShader.ID, "tempColor"), 0.5f, 0.5f, 0.5f);
         glUniform1i(glGetUniformLocation(newShader.ID, "useStaticTexture"), 1);
 
         //staticModel
         glm::mat4 staticMat = glm::mat4(1.0f);
+        staticMat = glm::translate(staticMat, glm::vec3(0.0f, 0.0f, -9.0f));
         glm::mat4 staticViewMat = glm::mat4(1.0f);
         staticViewMat = glm::translate(staticViewMat, glm::vec3(0.0f, 0.0f, -9.0f));
 
         //common projection mat
-        glm::mat4 projMat = glm::mat4(1.0f);
-        projMat = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        
 
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(staticMat));
-        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(staticViewMat));
+        //glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(staticViewMat));
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(projMat));
 
         glBindVertexArray(staticVAO);
@@ -312,6 +344,8 @@ int main() {
         //model 
         glm::mat4 transMat = glm::mat4(1.0f);
         //transMat = glm::translate(transMat, glm::vec3(-0.5f, 0.0f, 0.0f));
+        transMat = glm::translate(transMat, glm::vec3(-cos(timeVal) * 4.0f, 2.0f * (0.5f - cos(timeVal)), -sin(timeVal) * 4.0f - 12.0f));
+
         transMat = glm::rotate(transMat, rotAngle * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
         //view
@@ -320,7 +354,7 @@ int main() {
         
         
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transMat));
-        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat));
+        //glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat));
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(projMat));
         
         glBindVertexArray(VAO);
@@ -329,24 +363,29 @@ int main() {
         //////moving model config ends
 
         glm::mat4 transMat2 = glm::mat4(1.0f);
+        transMat2 = glm::translate(transMat2, glm::vec3(sin(timeVal) * 4.0f, 5.0f * (0.5f - cos(timeVal)), sin(timeVal) * 5.0f - 9.0f));
         transMat2 = glm::rotate(transMat2, rotAngle * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::mat4 viewMat2 = glm::mat4(1.0f);
         viewMat2 = glm::translate(viewMat2, glm::vec3(sin(timeVal) * 4.0f, 5.0f * (0.5f - cos(timeVal)), sin(timeVal) * 5.0f - 9.0f));
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transMat2));
-        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat2));
+        //glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat2));
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(projMat));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glm::mat4 transMat3 = glm::mat4(1.0f);
+        transMat3 = glm::translate(transMat3, glm::vec3(sin(timeVal) * 6.0f, 0.0f, -cos(timeVal) * 4.0f - 11.0f));
         transMat3 = glm::rotate(transMat3, rotAngle * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        glm::mat4 viewMat3 = glm::mat4(1.0f);
-        viewMat3 = glm::translate(viewMat3, glm::vec3(sin(timeVal) * 3.0f, 0.0f, -cos(timeVal) * 2.0f - 11.0f));
+       /* glm::mat4 viewMat3 = glm::mat4(1.0f);
+        viewMat3 = glm::translate(viewMat3, glm::vec3(sin(timeVal) * 3.0f, 0.0f, -cos(timeVal) * 2.0f - 11.0f));*/
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transMat3));
-        glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat3));
+        //glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(viewMat3));
         glUniformMatrix4fv(glGetUniformLocation(newShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(projMat));
+
+        
+        
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
@@ -363,6 +402,38 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+    
+}
+
 
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -373,4 +444,34 @@ void processInput(GLFWwindow* window) {
 void initiateSpin(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
         isRotating = true;
+}
+
+void processCamMovement(GLFWwindow* window) {
+    const float cameraSpeed = 0.05f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void resetCamera() {
+    cameraPos = initialPos;
+    cameraFront = initialFront;
+    cameraUp = initialUp;
+
+    yaw = -90.0f;
+    pitch = 0.0f;
+
+    lastX = 800.0f / 2.0f;
+    lastY = 600.0f / 2.0f;
+    firstMouse = true;
+}
+
+void processCamReset(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        resetCamera();
 }
