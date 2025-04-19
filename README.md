@@ -1,31 +1,14 @@
 # Some Experiments with OpenGL
 
-### Some fun with Textures and uniforms
+Note - The Old cube code now sits inside of the oldGLCube branch. 
 
-<img alt="dejaVU.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/dejaVU.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
+### Utah Teapot with Phong Lighting
 
-Trying out the Texture wrapping methods, Texture Coordinates and setting uniforms with GLFW function `glfwGetTime()`
+<img alt="UtahTeapot.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/crazyTeapotRender.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
 
-### Transformations: Rotation with textures
+<img alt="UtahTeapotTopView.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/crazyTeapotRenderTopView.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
 
-<img alt="enduranceRot.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/enduranceRot.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
+The Normals for circular plate of the down face is slightly inaccurate which gives weird lighting glow in the GL application. I corrected the normals for up face of the circular plate model in Blender and the updated model is present in output/models/Teapot.
 
-Dynamic rotation with speed increments 
 
-### Perspective projection: 3D cube and Multiple textures
 
-<img alt="gargantua.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/gargantua.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
-
- Using perspective projection with a static and moving model
-
- ### Rendering Multiple cubes
-
- <img alt="multipleCubes.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/multipleCubes.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
-
- Rendering multiple cubes in the scene with different transformation matrices
- 
- ### 3D Camera Movement
-
- <img alt="camMov.gif" src="https://github.com/abhishekingit/LearnOpenGL/blob/Main/assets/outputFiles/camMov.gif?raw=true" data-hpc="true" class="Box-sc-g0xbh4-0 kzRgrI" height="512px">
-
- Camera movements and mouse movements along with reset
