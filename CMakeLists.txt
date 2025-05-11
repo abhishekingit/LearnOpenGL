@@ -9,7 +9,7 @@ add_subdirectory(3rdParty/glad)
 add_subdirectory(3rdParty/glm)
 add_subdirectory(3rdParty/assimp)
 
-add_executable(LearnOpenGL src/main.cpp src/Shader.cpp src/Shader.h "src/Mesh.h" "src/Model.h")
+add_executable(LearnOpenGL src/main.cpp src/Shader.cpp src/Shader.h src/Mesh.h src/Model.h)
 
 target_link_libraries(LearnOpenGL glfw glad glm assimp)
 

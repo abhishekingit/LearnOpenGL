@@ -72,6 +72,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	std::vector<Texture> textures;
+	bool hasTexture;
 	ModelMaterial mat;
 
 	for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
@@ -96,17 +97,33 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		aiColor3D color(0.f, 0.f, 0.f);
-		float shininess = 32.0f;
+		aiColor3D color(0.0f, 0.0f, 0.0f);
+		float shininess = 0.0f;
 
-		if (material->Get(AI_MATKEY_COLOR_AMBIENT, color))
-			mat.ambient = glm::vec3(color.r, color.g, color.b);
-		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color))
-			mat.diffuse = glm::vec3(color.r, color.g, color.b);
-		if (material->Get(AI_MATKEY_COLOR_SPECULAR, color))
-			mat.specular = glm::vec3(color.r, color.g, color.b);
-		if (material->Get(AI_MATKEY_SHININESS, color))
-			mat.shininess = shininess;
+		if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) != AI_SUCCESS) {
+			color = aiColor3D(0.2f, 0.2f, 0.2f);
+			
+		}
+		mat.ambient = glm::vec3(color.r, color.g, color.b);
+
+		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) != AI_SUCCESS) {
+			color = aiColor3D(0.5f, 0.5f, 0.5f);
+
+		}
+		mat.diffuse = glm::vec3(color.r, color.g, color.b);
+
+		if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) != AI_SUCCESS) {
+			color = aiColor3D(0.5f, 0.5f, 0.5f);
+
+		}
+		mat.specular = glm::vec3(color.r, color.g, color.b);
+
+		if (material->Get(AI_MATKEY_SHININESS, shininess) != AI_SUCCESS) {
+			shininess = 32.0f;
+
+		}
+		mat.shininess = 32.0f;
+
 	}
 
 	if (mesh->mMaterialIndex >= 0) {
@@ -115,15 +132,23 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		std::vector<Texture> specularMaps = loadMaterialTexture(material, aiTextureType_SPECULAR, TextureType::Specular);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		std::vector<Texture> normalMaps = loadMaterialTexture(material, aiTextureType_NORMALS, TextureType::Normal);
+		std::vector<Texture> normalMaps = loadMaterialTexture(material, aiTextureType_HEIGHT, TextureType::Normal);
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-		//std::vector<Texture> baseColorMaps = loadMaterialTexture(material, aiTextureType_BASE_COLOR, )
-		//Need to handle more textures for PBR models
+		std::vector<Texture> baseColorMaps = loadMaterialTexture(material, aiTextureType_BASE_COLOR, TextureType::BaseColor);
+		textures.insert(textures.end(), baseColorMaps.begin(), baseColorMaps.end());
+		std::vector<Texture> metallicMaps = loadMaterialTexture(material, aiTextureType_REFLECTION, TextureType::Metallic);
+		textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
+
+		if (diffuseMaps.size() == 0) {
+			hasTexture = false;
+		}
+		else {
+			hasTexture = true;
+		}		
+		
 	}
 
-	
-
-	return Mesh(vertices, indices, textures, mat);
+	return Mesh(vertices, indices, textures, hasTexture, mat);
 
 }
 

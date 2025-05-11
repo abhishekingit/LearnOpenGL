@@ -31,7 +31,8 @@ enum TextureType {
 	Height,
 	BaseColor,
 	Emissive,
-	MetallicRough
+	Metallic,
+	Roughness
 };
 
 struct Texture {
@@ -45,10 +46,15 @@ public:
 	std::vector<Vertex> meshVertices;
 	std::vector<uint32_t> meshIndices;
 	std::vector<Texture> meshTextures;
+	bool hasTexture;
 	ModelMaterial material;
+	
 
-	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture> textures, ModelMaterial newMaterial) : meshVertices(std::move(vertices)), meshIndices(std::move(indices)), meshTextures(std::move(textures)) {
-		material = newMaterial;
+	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::vector<Texture> textures, bool textureExists, ModelMaterial newMaterial) : meshVertices(std::move(vertices)), meshIndices(std::move(indices)), meshTextures(std::move(textures)), hasTexture(textureExists) {
+		material.ambient = newMaterial.ambient;
+		material.diffuse = newMaterial.diffuse;
+		material.specular = newMaterial.specular;
+		material.shininess = newMaterial.shininess;
 		setupMesh();	
 	};
 	void Draw(Shader& shader) {
@@ -56,6 +62,7 @@ public:
 		uint32_t specularNx = 1;
 		uint32_t normalNx = 1;
 		uint32_t heightNx = 1;
+		uint32_t metalNx = 1;
 
 
 		for (uint32_t i = 0; i < meshTextures.size(); i++) {
@@ -78,14 +85,19 @@ public:
 				textureName == "texture_height";
 				number = std::to_string(heightNx++);
 			}
+			else if (meshTextures[i].textureType == TextureType::Metallic) {
+				textureName == "texture_metal";
+				number = std::to_string(metalNx++);
+			}
 			glUniform1i(glGetUniformLocation(shader.ID, (textureName + number).c_str()), i);
 			glBindTexture(GL_TEXTURE_2D, meshTextures[i].id);
 
 		}
-		glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(glm::vec3(0.1745f, 0.01175f, 0.01175f)));
-		glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(glm::vec3(0.61424f, 0.04136f, 0.04136f)));
-		glUniform3fv(glGetUniformLocation(shader.ID, "material.specular"), 1, glm::value_ptr(glm::vec3(0.727811f, 0.626959f, 0.626959f)));
-		glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 0.6f);
+		glUniform1i(glGetUniformLocation(shader.ID, "hasTexture"), hasTexture);
+		glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(material.ambient));
+		glUniform3fv(glGetUniformLocation(shader.ID, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
+		glUniform3fv(glGetUniformLocation(shader.ID, "material.specular"), 1, glm::value_ptr(material.specular));
+		glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), material.shininess);
 		
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, meshIndices.size(), GL_UNSIGNED_INT, 0);
@@ -126,8 +138,6 @@ private:
 
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, bitTangents)));
-
-		//glEnableVertexAttribArray(2);
 
 		glBindVertexArray(0);
 

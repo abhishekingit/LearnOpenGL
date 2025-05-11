@@ -79,7 +79,7 @@ int main() {
     Shader newShader("../../../src/model_loading.vert", "../../../src/model_loading.frag");
 
     //Model newModel("../../../assets/models/league-champions/source/championsTrophy.glb");
-    Model newModel("../../../assets/models/Teapot/teapot_n_glass.obj");
+    Model newModel("../../../assets/models/Teapot/teapot_n_glassMAT.obj");
 
     const std::array vertices = {
         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
@@ -163,23 +163,15 @@ int main() {
 
         lightPos.x = sin(glfwGetTime()) * 9.0f;
         lightPos.z = cos(glfwGetTime()) * 9.0f;
-
-  /*      lightingShader.use();*/
-    
-
-       /* glm::mat4 lightingProjection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
-        glm::mat4 lightCamViewMat = glm::mat4(1.0f);
-        lightCamViewMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "projM"), 1, GL_FALSE, glm::value_ptr(lightingProjection));
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "viewM"), 1, GL_FALSE, glm::value_ptr(lightCamViewMat));
-
-        glm::mat4 light*/
         
         newShader.use();
-        glUniform3f(glGetUniformLocation(newShader.ID, "objectColor"), 0.8f, 0.8f, 0.8f);
-        glUniform3f(glGetUniformLocation(newShader.ID, "lightColor"), 1.0f, 1.0f, 1.0f);
-        glUniform3fv(glGetUniformLocation(newShader.ID, "lightPos"), 1, glm::value_ptr(lightPos));
+        glUniform3f(glGetUniformLocation(newShader.ID, "objectColor"), 0.8f, 0.8f, 0.8f);      
         glUniform3fv(glGetUniformLocation(newShader.ID, "viewPos"), 1, glm::value_ptr(cameraPos));
+
+        glUniform3fv(glGetUniformLocation(newShader.ID, "light.position"), 1, glm::value_ptr(lightPos));
+        glUniform3f(glGetUniformLocation(newShader.ID, "light.ambient"), 0.4f, 0.4f, 0.4f);
+        glUniform3f(glGetUniformLocation(newShader.ID, "light.diffuse"), 0.7f, 0.7f, 0.7f);
+        glUniform3f(glGetUniformLocation(newShader.ID, "light.specular"), 1.0f, 1.0f, 1.0f);
         
         
 
